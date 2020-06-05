@@ -1,0 +1,230 @@
+configfile: "config.yaml"
+import pandas as pd
+df = pd.read_csv("output_parser/list.tsv", sep = '\t', header=None)
+IGR = df.iloc[:,1]=='IGR'
+number = tuple(df[IGR].iloc[:,5])
+
+df1 = pd.read_csv("input/tree_genomes", sep = '\t', header=None)
+IDS = tuple(df1.iloc[:,0])
+
+rule all:
+	input:
+		expand("art_reads/{sample}_1.fq", sample = IDS),
+		expand("art_reads/{sample}_2.fq", sample = IDS),
+		"assessed/all_vs_all.tsv",
+		"assessed/genome_assessed.tsv",
+		"assessed/histogram.png"
+
+
+##Python script for building IGR dawg fies.##
+rule IGR_dawg_files:
+	input:
+		Noncoding_regions = "output_parser/Noncoding_region.fa",
+		Tree = "input/tree_div100.nwk"
+	output:
+		nonbuilder = expand("dawg_builder/{dawg}.dawg", dawg = number)
+	params:
+		output = "dawg_builder"
+	threads: 16
+	log:
+		"logs/dawg_builder.log"
+	conda:
+		"envs/python.yaml"
+	shell:
+		 """
+		 python Modules/dawg_builder.py -i {input.Noncoding_regions} -a {input.Tree} -o {params.output} 2>&1> {log}
+		 """
+
+##ALF sim for proteincoding genes.##
+rule ALF:
+	input:
+		drw = "input/alf_protein_sim.drw",
+		db = "output_parser/Protein_coding_gene.db"
+	output:
+		output_alf = expand("alf-data/tree_testing/DB/{sample}_dna.fa", sample = IDS),
+	threads: 16
+	log:
+		"logs/alfsim.log"
+	shell:
+		 """
+		 alfsim {input.drw} 2>&1> {log}
+		 """
+
+##dawg sim for IGR##
+rule dawg_igr:
+	input:
+		nonbuilder = "dawg_builder/{dawg}.dawg"
+	output:
+		dawg_dir = "output_dawg/{dawg}.fas"
+	params:
+		name = "{dawg}"
+	threads: 8
+	log:
+		"logs/dawg/{dawg}.log"
+	conda:
+		 "envs/Dawg.yaml"
+	shell:
+		 """
+		 dawg {input.nonbuilder} 2>&1> {log}
+		 mv {params.name}.fas output_dawg
+		 """
+
+
+##Python script for assemble genomes##
+rule genome_creater:
+	input:
+		output_alf = "alf-data/tree_testing/DB/{sample}_dna.fa",
+		output_dawg = expand("output_dawg/{dawg}.fas", dawg = number),
+		list = "output_parser/list.tsv"
+	output:
+		genomes = "genomes/{sample}.fasta",
+
+	params:
+		dawg = "output_dawg"
+	threads: 8
+	log:
+		"logs/genome_{sample}.log"
+	conda:
+		"envs/python.yaml"
+	shell:
+		 """
+		 python Modules/genome_creater.py -i {input.output_alf} -l {input.list} -d {params.dawg} -o {output.genomes} 2>&1> {log}
+		 """
+rule ecoli:
+	input:
+		"input/E_coli_K12.fasta"
+	output:
+		"genomes/E_coli_K12.fasta"
+	params:
+		"genomes"
+	shell:
+		"""
+		cp -r {input} {params}
+		"""
+
+rule prokka:
+	input:
+		reference = "genomes/{sample}.fasta"
+	output:
+		tsv = "prokka/prokka-{sample}/prokka-{sample}.tsv"
+	params:
+		prefix = "{sample}",
+		genus = config["prokka"]["genus"]
+	threads: 8
+	log:
+		"logs/prokka/{sample}.log"
+	conda:
+		"envs/prokka.yaml"
+	shell:
+		"""
+		prokka --prefix prokka-{params.prefix} --genus {params.genus} --usegenus --fast --noanno --quiet --force --cpus {threads} {input.reference} 2>&1> {log}
+		mv prokka-{params.prefix} prokka
+		"""
+
+rule minimap2:
+	input:
+		genomes = "genomes/{sample}.fasta",
+		output_alf = "alf-data/tree_testing/DB/{sample}_dna.fa"
+	output:
+		output_map = "minimap/{sample}.paf"
+	threads: 4
+	conda:
+		"envs/minimap.yaml"
+	log:
+		"logs/minimap/{sample}.log"
+	shell:
+		"""
+		minimap2 {input.genomes} {input.output_alf} -o {output.output_map}
+		"""
+
+rule genome_assessor:
+	input:
+		genomes = expand("genomes/{sample}.fasta", sample = IDS),
+		tsv = expand("prokka/prokka-{sample}/prokka-{sample}.tsv", sample = IDS),
+		output_alf = expand("alf-data/tree_testing/DB/{sample}_dna.fa", sample = IDS),
+		output_map = expand("minimap/{sample}.paf", sample = IDS)
+	output:
+		assessed = "assessed/genome_assessed.tsv",
+	params:
+		quantity = config["tree"]["tips"],
+		dir = "genomes",
+		alf = "alf-data/tree_testing/DB",
+		map = "minimap",
+		prokka = "prokka"
+	threads: 16
+	log:
+		"logs/genome_assessor.log"
+	conda:
+		"envs/python.yaml"
+	shell:
+		"""
+		python Modules/genome_assessor.py -g {params.dir} -m {params.map} -a {params.alf} -p {params.prokka} -q {params.quantity} -o {output.assessed} 2>&1> {log}		
+		"""
+
+rule query_list:
+	input:
+		expand("genomes/{sample}.fasta", sample = IDS),
+		"genomes/E_coli_K12.fasta"
+	output:
+		"assessed/query_list.txt"
+	shell:
+		"""
+		ls {input} > {output}
+		"""
+
+
+rule fastani:
+	input:
+		query = "assessed/query_list.txt"
+	output:
+		all = "assessed/all_vs_all.tsv"
+	threads: 8
+	conda:
+		"envs/fastani.yaml"
+	log:
+		"logs/fastani.log"
+	shell:
+		"""
+		fastANI -t 16 --ql {input.query} --rl {input.query} -o {output.all} 2>&1> {log}
+		"""
+rule histogram:
+	input:
+		 all = "assessed/all_vs_all.tsv"
+	output:
+		histo = "assessed/histogram.png"
+	threads: 8
+	log:
+		"logs/histogram.log"
+	conda:
+		"envs/R.yaml"
+	shell:
+		 """
+		 Rscript Modules/Histogram -f {input.all} 2>&1> {log}
+		 mv Rplots.pdf assessed
+		 """
+rule art_reads:
+	input:
+		genomes ="genomes/{sample}.fasta"
+	output:
+		reads_1 = "art_reads/{sample}_1.fq",
+		reads_2 = "art_reads/{sample}_2.fq"
+	params:
+		length = config["art_reads"]["length"],
+		insert = config["art_reads"]["insert"],
+		coverage = config["art_reads"]["coverage"],
+		deviation = config["art_reads"]["deviation"],
+		dir = "{sample}",
+		seed = config["art_reads"]["seed"]
+	conda:
+		"envs/art.yaml"
+	threads: 4
+	log:
+		"logs/art_{sample}.log"
+	shell:
+		 """
+		 art_illumina -ss HS25 -na -rs {params.seed} -i {input.genomes} -p -l {params.length} -f {params.coverage} -m {params.insert} -s {params.deviation} -o {params.dir}_ 2>&1> {log}
+		 mv {params.dir}_1.fq art_reads
+		 mv {params.dir}_2.fq art_reads
+		 """
+
+

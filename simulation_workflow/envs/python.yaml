@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - anaconda
+dependencies:
+  - python=3.6.1
+  - argparse=1.4.0
+  - biopython=1.76

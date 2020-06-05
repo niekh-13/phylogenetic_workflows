@@ -1,0 +1,4 @@
+channels:
+  - bioconda
+dependencies:
+  - ska=1.0
