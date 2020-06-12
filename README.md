@@ -5,15 +5,15 @@ Nowadays it is more than obvious that genomic epidemiology is of great importanc
 ## Usage ##
 ### Parsing genome into IGR and CDS ###
 ```
-snakemake -j <threads> --use-conda -f Snakefile_parse
+snakemake -j <threads> --use-conda -s Snakefile_parse
 ```
 ### Simulating genome and reads ###
 ```
-snakemake -j <threads> --use-conda -f Snakefile_simulation
+snakemake -j <threads> --use-conda -s Snakefile_simulation
 ```
 ### Phylogentic workflows ###
 ```
-snakemake -j <threads> --use-conda -f Snakefile_phylogenetic
+snakemake -j <threads> --use-conda -s Snakefile_phylogenetic
 ```
 ## Overview ##
 <img src="./Overview.png">
