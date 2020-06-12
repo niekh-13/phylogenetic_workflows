@@ -1,11 +1,22 @@
-# phylogenetic_workflows
-benchmarkig phylogenetic workflows for E.coli K12 whole genome
+# Benchmarkig phylogenetic workflows for E.coli K12 whole genome
+**Phylogenetic workflow**
 
-In this repo there are three workflows written in snakemake. Each workflows joins the other to succesfully reproduce the result I obtained. 
-# flowchart of the whole workflow
+## flowchart of the whole workflow
 <img src="./phylogenies.png">
 
-# flowchart of the simulation workflow in detail
+## flowchart of the simulation workflow in detail
 <img src="./Simulator.png">
 
-Written by Niek Huijsmans
+## Authors
+Authors:
+- Niek Huijsmans
+- Boas van der Putten
+
+Contributers:
+- Daniel Mende
+
+## License
+
+[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
+
+- **[MIT license](http://opensource.org/licenses/mit-license.php)**
