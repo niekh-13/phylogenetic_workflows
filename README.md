@@ -4,9 +4,9 @@ Nowadays it is more than obvious that genomic epidemiology is of great importanc
 
 ## Usage ##
 ### Parsing genome into IGR and CDS ###
-'''
-snakemake -j <threads> --use-conda -f Snakemake_parse
-'''
+
+  snakemake -j <threads> --use-conda -f Snakemake_parse
+
   
 ## Overview ##
 <img src="./Overview.png">
