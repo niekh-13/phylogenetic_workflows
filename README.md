@@ -1,5 +1,5 @@
-# Phylogenetic workflow
-**Benchmarkig phylogenetic workflows for E.coli K12 whole genome**
+# Benchmarkig phylogenetic workflows for E.coli K12 whole genome
+**Phylogenetic workflow**
 
 ## flowchart of the whole workflow
 <img src="./phylogenies.png">
