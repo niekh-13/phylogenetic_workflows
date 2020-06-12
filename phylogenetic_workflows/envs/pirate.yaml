@@ -1,4 +1,0 @@
-channels:
-  - bioconda
-dependencies:
-  - pirate=1.0.3

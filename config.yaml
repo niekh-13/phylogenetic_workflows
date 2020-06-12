@@ -1,0 +1,48 @@
+skesa:
+ min_contig_len: "500"
+
+shovill_velvet:
+ assembler: "velvet"
+ genome_size: "4.7M"
+ min_contig_len: "500"
+ depth: "100"
+
+shovill_spades:
+ assembler: "spades"
+ genome_size: "4.7M"
+ min_contig_len: "500"
+ depth: "100"
+
+spades:
+ basic_options: "--isolate"
+ min_contig_len: "500"
+
+quast:
+ min_contig_len: "500"
+
+quast_report:
+ quantity: "96"
+ name: "quast-report"
+
+prokka:
+ genus: "Escherichia"
+
+snippy:
+ ecolik12: "genomes/E_coli_K12.fasta"
+ general: "--force --cleanup"
+
+ksnp:
+ kmersize: "31"
+
+tree:
+  tips: "96"
+
+art_reads:
+  length: "150"
+  insert: "600"
+  coverage: "30"
+  deviation: "10"
+  seed: "21"
+
+prokka:
+  genus: "Escherichia"

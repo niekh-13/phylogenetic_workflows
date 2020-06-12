@@ -1,4 +1,0 @@
-channels:
-  - bioconda
-dependencies:
-  - fastani=1.2

@@ -1,4 +1,0 @@
-channels:
-  - bioconda
-dependencies:
-  - dawg=2.0.beta1
