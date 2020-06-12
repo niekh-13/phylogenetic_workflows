@@ -7,7 +7,7 @@ Nowadays it is more than obvious that genomic epidemiology is of great importanc
 ```
 snakemake -j <threads> --use-conda -s Snakefile_parse
 ```
-### Simulating genome and reads ###
+### In silico evolution and simulating reads ###
 ```
 snakemake -j <threads> --use-conda -s Snakefile_simulation
 ```
