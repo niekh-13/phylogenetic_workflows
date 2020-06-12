@@ -11,6 +11,7 @@ Benchmarkig phylogenetic workflows for E.coli K12 whole genome
 Authors:
 - Niek Huijsmans
 - Boas van der Putten
+
 Contributers:
 - Daniel Mende
 
