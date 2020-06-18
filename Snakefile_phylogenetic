@@ -9,19 +9,20 @@ rule all:
         "plots/genome_fraction.pdf",
         "plots/complete_features.pdf",
         "plots/total_features.pdf",
-        "RF_distance/ska_fastq.txt",
-        "RF_distance/ska_shovill.txt",
-        "RF_distance/ska_spades.txt",
-        "RF_distance/roary_spades.txt",
-        "RF_distance/snippy.txt",
-        "RF_distance/roary_shovill.txt",
-        "RF_distance/roary_skesa.txt",
-        "RF_distance/pirate_spades.txt",
-        "RF_distance/pirate_shovill.txt",
-        "RF_distance/pirate_skesa.txt",
-        "RF_distance/ksnp_spades.txt",
-        "RF_distance/ksnp_shovill.txt",
-        "RF_distance/ksnp_skesa.txt",
+        "RF_distance/ska_fastq.rfdist",
+        "RF_distance/ska_shovill.rfdist",
+        "RF_distance/ska_spades.rfdist",
+        "RF_distance/ska_skesa.rfdist",
+        "RF_distance/roary_spades.rfdist",
+        "RF_distance/snippy.rfdist",
+        "RF_distance/roary_shovill.rfdist",
+        "RF_distance/roary_skesa.rfdist",
+        "RF_distance/pirate_spades.rfdist",
+        "RF_distance/pirate_shovill.rfdist",
+        "RF_distance/pirate_skesa.rfdist",
+        "RF_distance/ksnp_spades.rfdist",
+        "RF_distance/ksnp_shovill.rfdist",
+        "RF_distance/ksnp_skesa.rfdist",
 
 ###actual Workflow:
 
@@ -665,7 +666,7 @@ rule ksnp_skesa:
     shell:
         """
         kSNP3 -in {input.list} -outdir {output.kSNP3} -k {params.kmersize} -core -CPU {threads} 2>&1> {log}
-        if [ -f {output.kSNP3}/core_SNPS_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPS_matrix.fasta exists"; else exit 1; 
+        if [ -f {output.kSNP3}/core_SNPs_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPs_matrix.fasta exists"; else echo "Can not find {output.kSNP3}/core_SNPs_matrix.fasta!" && exit 1; fi
         """
 rule ksnp_spades:
     input:
@@ -682,7 +683,7 @@ rule ksnp_spades:
     shell:
         """
         kSNP3 -in {input.list} -outdir {output.kSNP3} -k {params.kmersize} -core -CPU {threads} 2>&1> {log}
-        f [ -f {output.kSNP3}/core_SNPS_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPS_matrix.fasta exists"; else exit 1; 
+        if [ -f {output.kSNP3}/core_SNPs_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPs_matrix.fasta exists"; else echo "Can not find {output.kSNP3}/core_SNPs_matrix.fasta!" && exit 1; fi
         """
 rule ksnp_shovill:
     input:
@@ -699,7 +700,7 @@ rule ksnp_shovill:
     shell:
         """
         kSNP3 -in {input.list} -outdir {output.kSNP3} -k {params.kmersize} -core -CPU {threads} 2>&1> {log}
-        f [ -f {output.kSNP3}/core_SNPS_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPS_matrix.fasta exists"; else exit 1; 
+        if [ -f {output.kSNP3}/core_SNPs_matrix.fasta ]; then echo "{output.kSNP3}/core_SNPs_matrix.fasta exists"; else echo "Can not find {output.kSNP3}/core_SNPs_matrix.fasta!" && exit 1; fi
         """
 
 #filter before IQ-tree
@@ -927,7 +928,7 @@ rule IQTree_roary_shovill:
     shell:
          """
          cd {params.dir}
-         iqtree -fconst $(snp-sites -C ../../{input.full}/core_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
+         iqtree -fconst $(snp-sites -C ../../{input.full}/core_gene_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
          """
 rule IQTree_roary_spades:
     input:
@@ -946,7 +947,7 @@ rule IQTree_roary_spades:
     shell:
          """
          cd {params.dir}
-         iqtree -fconst $(snp-sites -C ../../{input.full}/core_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
+         iqtree -fconst $(snp-sites -C ../../{input.full}/core_gene_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
          """
 rule IQTree_roary_skesa:
     input:
@@ -965,7 +966,7 @@ rule IQTree_roary_skesa:
     shell:
          """
          cd {params.dir}
-         iqtree -fconst $(snp-sites -C ../../{input.full}/core_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
+         iqtree -fconst $(snp-sites -C ../../{input.full}/core_gene_alignment.aln) -nt {threads} -pre {params.prefix} -s ../../{input.snp} 2>&1> ../../{log}
          """
 rule IQTree_pirate_skesa:
     input:
@@ -1066,13 +1067,13 @@ rule IQTree_ksnp_skesa:
     output:
         nwk = "IQ-Tree/ksnp_skesa/ksnp_skesa.treefile"
     params:
-        prefix = "ksnp_shovill",
-        dir = "IQ-Tree/ksnp_shovill"
+        prefix = "ksnp_skesa",
+        dir = "IQ-Tree/ksnp_skesa"
     conda:
          "envs/IQtree.yaml"
     threads: 16
     log:
-       "logs/iqtree/ksnp_shovill.log"
+       "logs/iqtree/ksnp_skesa.log"
     shell:
          """
          cd {params.dir}
@@ -1085,9 +1086,10 @@ rule RF_distance_ska_fastq:
         nwk = "IQ-Tree/ska_fastq/ska_fastq.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ska_fastq.txt"
+        rf_distance = "RF_distance/ska_fastq.rfdist"
     params:
-          "ska_fastq"
+        prefix = "ska_fastq",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1095,17 +1097,19 @@ rule RF_distance_ska_fastq:
        "logs/RF_distance/ska_fastq.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
+         
          """
 rule RF_distance_ska_shovill:
     input:
         nwk = "IQ-Tree/ska_shovill/ska_shovill.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ska_shovill.txt"
+        rf_distance = "RF_distance/ska_shovill.rfdist"
     params:
-          "ska_shovill"
+        prefix = "ska_shovill",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1113,17 +1117,18 @@ rule RF_distance_ska_shovill:
        "logs/RF_distance/ska_shovill.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_ska_spades:
     input:
         nwk = "IQ-Tree/ska_spades/ska_spades.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ska_spades.txt"
+        rf_distance = "RF_distance/ska_spades.rfdist"
     params:
-          "ska_spades"
+        prefix = "ska_spades",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1131,17 +1136,18 @@ rule RF_distance_ska_spades:
        "logs/RF_distance/ska_spades.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_ska_skesa:
     input:
         nwk = "IQ-Tree/ska_skesa/ska_skesa.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ska_skesa.txt"
+        rf_distance = "RF_distance/ska_skesa.rfdist"
     params:
-          "ska_skesa"
+        prefix = "ska_skesa",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1149,17 +1155,18 @@ rule RF_distance_ska_skesa:
        "logs/RF_distance/ska_skesa.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_snippy:
     input:
         nwk = "IQ-Tree/snippy/snippy.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/snippy.txt"
+        rf_distance = "RF_distance/snippy.rfdist"
     params:
-          "snippy"
+        prefix = "snippy",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1167,17 +1174,18 @@ rule RF_distance_snippy:
        "logs/RF_distance/snippy.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_roary_shovill:
     input:
         nwk = "IQ-Tree/roary_shovill/roary_shovill.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/roary_shovill.txt"
+        rf_distance = "RF_distance/roary_shovill.rfdist"
     params:
-          "roary_shovill"
+        prefix = "roary_shovill",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1185,17 +1193,18 @@ rule RF_distance_roary_shovill:
        "logs/RF_distance/roary_shovill.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_roary_spades:
     input:
         nwk = "IQ-Tree/roary_spades/roary_spades.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/roary_spades.txt"
+        rf_distance = "RF_distance/roary_spades.rfdist"
     params:
-          "roary_spades"
+        prefix = "roary_spades",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1203,35 +1212,37 @@ rule RF_distance_roary_spades:
        "logs/RF_distance/roary_spades.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_roary_skesa:
     input:
         nwk = "IQ-Tree/roary_skesa/roary_skesa.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/roary_skesa.txt"
+        rf_distance = "RF_distance/roary_skesa.rfdist"
     params:
-          "roary_skesa"
+        prefix = "roary_skesa",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
     log:
        "logs/RF_distance/roary_skesa.log"
     shell:
-         """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+              """
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_pirate_skesa:
     input:
         nwk = "IQ-Tree/pirate_skesa/pirate_skesa.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/pirate_skesa.txt"
+        rf_distance = "RF_distance/pirate_skesa.rfdist"
     params:
-          "pirate_skesa"
+        prefix = "pirate_skesa",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1239,17 +1250,18 @@ rule RF_distance_pirate_skesa:
        "logs/RF_distance/pirate_skesa.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_pirate_spades:
     input:
         nwk = "IQ-Tree/pirate_spades/pirate_spades.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/pirate_spades.txt"
+        rf_distance = "RF_distance/pirate_spades.rfdist"
     params:
-          "pirate_spades"
+        prefix = "pirate_spades",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1257,17 +1269,18 @@ rule RF_distance_pirate_spades:
        "logs/RF_distance/pirate_spades.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_pirate_shovill:
     input:
         nwk = "IQ-Tree/pirate_shovill/pirate_shovill.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/pirate_shovill.txt"
+        rf_distance = "RF_distance/pirate_shovill.rfdist"
     params:
-          "pirate_shovill"
+        prefix = "pirate_shovill",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1275,17 +1288,18 @@ rule RF_distance_pirate_shovill:
        "logs/RF_distance/pirate_shovill.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_ksnp_shovill:
     input:
         nwk = "IQ-Tree/ksnp_shovill/ksnp_shovill.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ksnp_shovill.txt"
+        rf_distance = "RF_distance/ksnp_shovill.rfdist"
     params:
-          "ksnp_shovill"
+        prefix = "ksnp_shovill",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1293,17 +1307,18 @@ rule RF_distance_ksnp_shovill:
        "logs/RF_distance/ksnp_shovill.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_ksnp_spades:
     input:
         nwk = "IQ-Tree/ksnp_spades/ksnp_spades.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ksnp_spades.txt"
+        rf_distance = "RF_distance/ksnp_spades.rfdist"
     params:
-          "ksnp_spades"
+        prefix = "ksnp_spades",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1311,17 +1326,18 @@ rule RF_distance_ksnp_spades:
        "logs/RF_distance/ksnp_spades.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 rule RF_distance_ksnp_skesa:
     input:
         nwk = "IQ-Tree/ksnp_skesa/ksnp_skesa.treefile",
         realtree = "input/tree_div100.nwk"
     output:
-        rf_distance = "RF_distance/ksnp_skesa.txt"
+        rf_distance = "RF_distance/ksnp_skesa.rfdist"
     params:
-          "ksnp_skesa"
+        prefix = "ksnp_skesa",
+        dir = "RF_distance"
     conda:
          "envs/IQtree.yaml"
     threads: 8
@@ -1329,8 +1345,8 @@ rule RF_distance_ksnp_skesa:
        "logs/RF_distance/ksnp_skesa.log"
     shell:
          """
-         iqtree -pre {params} -nt {threads} -rf {input.realtree} {input.nwk} 2>&1> {log}
-         cp {params}.rfdist {output.rf_distance}
+         cd {params.dir}
+         iqtree -pre {params.prefix} -nt {threads} -rf ../{input.realtree} ../{input.nwk} 2>&1> ../{log}
          """
 
 #kendall and colijn metrics with treespace
