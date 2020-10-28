@@ -1,0 +1,4 @@
+channels:
+  - bioconda
+dependencies:
+  - clustalo=1.2.4

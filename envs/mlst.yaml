@@ -1,0 +1,5 @@
+channels:
+ - bioconda
+dependencies:
+ - perl-bio-mlst-check=2.1.1706216
+ - perl-bioperl=1.7.2
