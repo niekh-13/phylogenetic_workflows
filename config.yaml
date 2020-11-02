@@ -46,3 +46,8 @@ art_reads:
 
 prokka:
   genus: "Escherichia"
+
+mlst:
+ specie: "Escherichia coli 1"
+ database_dir: "/project/phylogen/databases/"
+
